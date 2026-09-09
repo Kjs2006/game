@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주사위 텍스트 RPG 모험</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #66fcf1; margin-bottom: 10px; font-size: 24px; }
+        #game-container {
+            width: 650px;
+            margin: 0 auto;
+            background: #1f2833;
+            border: 4px solid #66fcf1;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 0 25px rgba(102, 252, 241, 0.2);
+            text-align: left;
+        }
+        #status-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #0b0c10;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #45a29e;
+            border: 1px solid #45a29e;
+        }
+        #story-box {
+            background: #0b0c10;
+            padding: 18px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 90px;
+            border-left: 5px solid #66fcf1;
+        }
+        #dice-area {
+            text-align: center;
+            font-size: 28px;
+            margin: 15px 0;
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+        .action-btn {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: 0.1s;
+        }
+        .action-btn:hover { background-color: #45a29e; color: white; }
+        .action-btn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        
+        #log-box {
+            margin-top: 20px;
+            background: #0b0c10;
+            border-radius: 8px;
+            padding: 10px;
+            height: 90px;
+            overflow-y: auto;
+            font-size: 13px;
+            font-family: monospace;
+            border: 1px solid #45a29e;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>🎲 운명의 주사위: 판타지 모험</h1>
+        
+        <!-- 상태창 -->
+        <div id="status-bar">
+            <div>체력 ❤️ <span id="hp">5</span></div>
+            <div>현재 챕터 📖 <span id="chapter">1</span> / 5</div>
+            <div>필요 목표치: 주사위 합 <span id="target-val" style="color:#ffeb3b;">8</span> 이상</div>
+        </div>
+
+        <!-- 스토리 텍스트 영역 -->
+        <div id="story-box" id="story-text">
+            모험이 시작됩니다. 첫 번째 관문을 통과하세요!
+        </div>
+
+        <!-- 주사위 결과 표시 영역 -->
+        <div id="dice-area">
+            🎲 [ ? ] + [ ? ] = 합계 ?
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div id="btn-container">
+            <button id="roll-btn" class="action-btn" onclick="rollDice()">주사위 굴리기 (2개)</button>
+        </div>
+
+        <!-- 로그 기록 -->
+        <div id="log-box">
+            게임에 오신 것을 환영합니다. 주사위를 굴려 운명을 결정하세요.
+        </div>
+    </div>
+
+    <script>
+        let hp = 5;
+        let currentChapter = 0;
+
+        // 모험 스토리 데이터 (각 단계별 이야기와 돌파해야 할 목표 주사위 합계)
+        const storyChapters = [
+            {
+                text: "챕터 1: 어두운 숲 입구\n깊고 어두운 숲에 들어서자 거대한 거미줄이 길을 가로막습니다. 힘으로 찢고 나아가야 합니다!",
+                target: 7
+            },
+            {
+                text: "챕터 2: 버려진 고대 유적의 다리\n부서져가는 외나무다리를 건너야 합니다. 균형을 잘 잡지 못하면 아래로 추락합니다!",
+                target: 8
+            },
+            {
+                text: "챕터 3: 오크 정찰병과의 조우\n숲을 지키던 사나운 오크 정찰병이 길을 막아섭니다. 재빠르게 제압하거나 따돌려야 합니다!",
+                target: 9
+            },
+            {
+                text: "챕터 4: 거대한 암흑의 문\n마지막 보스가 지키고 있는 마법의 성문입니다. 강력한 주문을 외워 문을 부수세요!",
+                target: 10
+            },
+            {
+                text: "챕터 5: 최종 결전 - 마왕의 방\n마왕과의 마지막 사투! 운명의 주사위를 던져 세계를 구원하세요!",
+                target: 11
+            }
+        ];
+
+        function initGame() {
+            currentChapter = 0;
+            hp = 5;
+            updateUI();
+            loadChapter();
+        }
+
+        function updateUI() {
+            document.getElementById("hp").textContent = hp;
+            if (currentChapter < storyChapters.length) {
+                document.getElementById("chapter").textContent = currentChapter + 1;
+                document.getElementById("target-val").textContent = storyChapters[currentChapter].target;
+            }
+        }
+
+        function loadChapter() {
+            if (currentChapter >= storyChapters.length) {
+                // 게임 승리
+                document.getElementById("story-box").innerHTML = "🏆 <b>축하합니다! 모든 시련을 이겨내고 모험을 성공적으로 완수했습니다!</b>";
+                document.getElementById("dice-area").textContent = "✨ 대단원 클리어 ✨";
+                document.getElementById("btn-container").innerHTML = `<button class="action-btn" onclick="initGame()">다시 모험하기</button>`;
+                addLog("🎉 모험을 최종 클리어했습니다!");
+                return;
+            }
+
+            let chapter = storyChapters[currentChapter];
+            document.getElementById("story-box").innerHTML = chapter.text.replace(/\n/g, '<br>');
+            document.getElementById("dice-area").textContent = `🎲 [ ? ] + [ ? ] = 합계 ?`;
+            document.getElementById("roll-btn").disabled = false;
+            updateUI();
+        }
+
+        function addLog(text) {
+            let logBox = document.getElementById("log-box");
+            logBox.innerHTML += `<br>` + text;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function rollDice() {
+            let rollBtn = document.getElementById("roll-btn");
+            rollBtn.disabled = true;
+
+            // 주사위 2개 굴리기 (1~6 사이 랜덤)
+            let d1 = Math.floor(Math.random() * 6) + 1;
+            let d2 = Math.floor(Math.random() * 6) + 1;
+            let sum = d1 + d2;
+            let target = storyChapters[currentChapter].target;
+
+            document.getElementById("dice-area").textContent = `🎲 [ ${d1} ] + [ ${d2} ] = 합계 ${sum}`;
+
+            // 판정
+            setTimeout(() => {
+                if (sum >= target) {
+                    addLog(`✅ [성공] 주사위 합 ${sum} (목표 ${target} 이상)! 위기를 헤쳐나갔습니다.`);
+                    currentChapter++;
+                    
+                    if (currentChapter < storyChapters.length) {
+                        addLog(`➡️ 다음 이야기로 넘어갑니다.`);
+                        setTimeout(loadChapter, 1200);
+                    } else {
+                        loadChapter(); // 클리어 화면 로드
+                    }
+                } else {
+                    hp--;
+                    addLog(`❌ [실패] 주사위 합 ${sum} (목표 ${target} 미달). 시련을 극복하지 못해 체력 -1!`);
+                    updateUI();
+
+                    if (hp <= 0) {
+                        document.getElementById("story-box").innerHTML = "💀 <b>체력이 모두 소모되어 모험에 실패했습니다... 게임 오버</b>";
+                        document.getElementById("btn-container").innerHTML = `<button class="action-btn" onclick="initGame()">다시 도전하기</button>`;
+                        addLog("💀 체력 바닥으로 게임 오버!");
+                    } else {
+                        addLog(`⚠️ 다시 주사위를 굴려 도전하세요!`);
+                        rollBtn.disabled = false; // 재도전 기회 부여
+                    }
+                }
+            }, 500);
+        }
+
+        // 최초 실행
+        initGame();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>골키퍼 방어 게임!</title>
+    <style>
+        body {
+            background-color: #2e7d32;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { margin-bottom: 5px; }
+        #scoreboard {
+            font-size: 20px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        #field {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background: linear-gradient(to bottom, #81c784, #4caf50);
+            border: 5px solid white;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        /* 골대 */
+        #goal {
+            position: absolute;
+            top: 20px;
+            left: 100px;
+            width: 400px;
+            height: 150px;
+            border: 6px solid white;
+            border-bottom: none;
+            box-sizing: border-box;
+        }
+        /* 축구공 */
+        #ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            bottom: 20px;
+            left: 280px;
+            box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2);
+            transition: all 0.5s ease-in;
+        }
+        /* 골키퍼 */
+        #keeper {
+            position: absolute;
+            top: 110px;
+            left: 260px;
+            width: 80px;
+            height: 60px;
+            background-color: #ff5722;
+            color: white;
+            font-weight: bold;
+            line-height: 60px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        /* 버튼 영역 */
+        #controls {
+            margin-top: 20px;
+        }
+        .btn {
+            font-size: 20px;
+            padding: 15px 30px;
+            margin: 0 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: 0.1s;
+        }
+        .btn:active { transform: translateY(2px); }
+        #btn-left { background-color: #2196F3; }
+        #btn-center { background-color: #FF9800; }
+        #btn-right { background-color: #e91e63; }
+        
+        #message {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚽ 페널티킥 골키퍼 게임 ⚽</h1>
+    <div id="scoreboard">
+        점수: <span id="score">0</span>점 | 실점: <span id="miss">0</span>개
+    </div>
+
+    <div id="field">
+        <!-- 골대 -->
+        <div id="goal"></div>
+        <!-- 골키퍼 -->
+        <div id="keeper">GK</div>
+        <!-- 축구공 -->
+        <div id="ball"></div>
+    </div>
+
+    <div id="message">버튼을 눌러 방향을 정하세요!</div>
+
+    <div id="controls">
+        <button id="btn-left" class="btn" onclick="shoot('left')">👈 좌측 막기</button>
+        <button id="btn-center" class="btn" onclick="shoot('center')">👆 정면 막기</button>
+        <button id="btn-right" class="btn" onclick="shoot('right')">👉 우측 막기</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let miss = 0;
+        let isPlaying = false;
+
+        function shoot(playerChoice) {
+            if (isPlaying) return; // 공이 날아가는 동안 중복 클릭 방지
+            isPlaying = true;
+
+            const ball = document.getElementById("ball");
+            const keeper = document.getElementById("keeper");
+            const message = document.getElementById("message");
+
+            message.textContent = "슛~! 공이 날아옵니다!";
+
+            // 1. 컴퓨터가 랜덤으로 방향 결정 (0: 좌, 1: 중, 2: 우)
+            const directions = ['left', 'center', 'right'];
+            const computerChoice = directions[Math.floor(Math.random() * directions.length)];
+
+            // 2. 골키퍼 움직이기 (화면 좌표 설정)
+            if (playerChoice === 'left') {
+                keeper.style.left = "130px";
+            } else if (playerChoice === 'center') {
+                keeper.style.left = "260px";
+            } else if (playerChoice === 'right') {
+                keeper.style.left = "390px";
+            }
+
+            // 3. 축구공 움직이기 (골대 안쪽으로 슈팅)
+            setTimeout(() => {
+                if (computerChoice === 'left') {
+                    ball.style.left = "130px";
+                    ball.style.top = "40px";
+                } else if (computerChoice === 'center') {
+                    ball.style.left = "280px";
+                    ball.style.top = "40px";
+                } else if (computerChoice === 'right') {
+                    ball.style.left = "430px";
+                    ball.style.top = "40px";
+                }
+            }, 200);
+
+            // 4. 결과 판정 (0.6초 뒤 실행)
+            setTimeout(() => {
+                if (playerChoice === computerChoice) {
+                    message.textContent = "🎉 슈퍼 세이브! 공을 막아냈습니다!";
+                    message.style.color = "#ffeb3b";
+                    score++;
+                    document.getElementById("score").textContent = score;
+                } else {
+                    message.textContent = "❌ 으악! 골을 허용했습니다!";
+                    message.style.color = "#ff5252";
+                    miss++;
+                    document.getElementById("miss").textContent = miss;
+                }
+
+                // 5. 1초 뒤 게임 초기화 (다음 턴 준비)
+                setTimeout(() => {
+                    resetGame();
+                }, 1200);
+
+            }, 700);
+        }
+
+        function resetGame() {
+            const ball = document.getElementById("ball");
+            const keeper = document.getElementById("keeper");
+            const message = document.getElementById("message");
+
+            // 원래 위치로 되돌리기
+            ball.style.transition = "none"; // 순간 이동용
+            ball.style.left = "280px";
+            ball.style.top = "";
+            ball.style.bottom = "20px";
+            
+            keeper.style.transition = "none";
+            keeper.style.left = "260px";
+
+            // 애니메이션 복구를 위한 지연
+            setTimeout(() => {
+                ball.style.transition = "all 0.5s ease-in";
+                keeper.style.transition = "all 0.3s ease-out";
+            }, 50);
+
+            message.textContent = "방향을 골라주세요!";
+            message.style.color = "white";
+            isPlaying = false;
+        }
+    </script>
+
+</body>
+</html>

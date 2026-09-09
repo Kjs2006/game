@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>국기 퀴즈 어드벤처</title>
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 { margin: 5px 0; font-size: 24px; color: #e94560; }
+        
+        #game-container {
+            width: 700px;
+            margin: 0 auto;
+            background: #16213e;
+            border: 4px solid #0f3460;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* 상단 상태창 */
+        #status-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* 게임 화면 (캐릭터와 적) */
+        #battle-field {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(to bottom, #4e54c8, #8f94fb);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            box-sizing: border-box;
+        }
+
+        .character-box, .enemy-box {
+            font-size: 45px;
+            transition: transform 0.2s;
+        }
+
+        /* 퀴즈 박스 */
+        #quiz-box {
+            background: #0f3460;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        #flag-display {
+            font-size: 70px;
+            margin: 5px 0;
+        }
+
+        #question-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #f1f1f1;
+        }
+
+        .choice-btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .choice-btn:hover { background-color: #ff6b81; transform: scale(1.05); }
+        .choice-btn:active { transform: scale(0.95); }
+
+        /* 아이템 상점 영역 */
+        #shop-box {
+            margin-top: 10px;
+            background: #0f3460;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .item-btn {
+            background-color: #4e54c8;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 3px;
+            font-size: 13px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .item-btn:hover { background-color: #6c71df; }
+
+        #message {
+            font-size: 16px;
+            font-weight: bold;
+            height: 25px;
+            margin-top: 10px;
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <h1>🚩 국기 퀴즈 어드벤처 RPG</h1>
+
+        <!-- 상태창 -->
+        <div id="status-bar">
+            <div>거리: <span id="distance">0</span>m / 500m</div>
+            <div>체력 ❤️ <span id="hp">3</span></div>
+            <div>골드 🪙 <span id="gold">100</span>원</div>
+        </div>
+
+        <!-- 전장 -->
+        <div id="battle-field">
+            <div class="character-box" id="hero">🦸‍♂️</div>
+            <div style="font-size: 14px; background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 5px;" id="stage-info">전진 중...</div>
+            <div class="enemy-box" id="enemy">👹</div>
+        </div>
+
+        <!-- 메시지 -->
+        <div id="message">모험을 시작합니다! 국기를 맞추며 전진하세요!</div>
+
+        <!-- 퀴즈 영역 -->
+        <div id="quiz-box">
+            <div id="flag-display">🏳️</div>
+            <div id="question-text">적이 나타났다! 이 국기의 국가는?</div>
+            <div id="choices">
+                <!-- 선택지 버튼이 동적으로 생성됨 -->
+            </div>
+        </div>
+
+        <!-- 아이템 상점 -->
+        <div id="shop-box">
+            🛒 <b>찬스 상점</b> 
+            <button class="item-btn" onclick="buyItem('heal')">❤️ 체력 회복 (+1) [50G]</button>
+            <button class="item-btn" onclick="buyItem('skip')">⏭️ 오답 1개 제거 찬스 [70G]</button>
+            <button class="item-btn" onclick="buyItem('shield')">🛡️ 방패 장착 (다음 데미지 무효) [100G]</button>
+        </div>
+    </div>
+
+    <script>
+        // 게임 데이터 (국기 이모지, 정답, 오답 후보군들)
+        const countryData = [
+            { flag: "🇰🇷", name: "대한민국" },
+            { flag: "🇺🇸", name: "미국" },
+            { flag: "🇯🇵", name: "일본" },
+            { flag: "🇬🇧", name: "영국" },
+            { flag: "🇫🇷", name: "프랑스" },
+            { flag: "🇩🇪", name: "독일" },
+            { flag: "🇨🇦", name: "캐나다" },
+            { flag: "🇦🇺", name: "호주" },
+            { flag: "🇧🇷", name: "브라질" },
+            { flag: "🇮🇹", name: "이탈리아" },
+            { flag: "🇪🇸", name: "스페인" },
+            { flag: "🇨🇳", name: "중국" },
+            { flag: "🇮🇳", name: "인도" },
+            { flag: "🇷🇺", name: "러시아" },
+            { flag: "🇲🇽", name: "멕시코" },
+            { flag: "🇻🇳", name: "베트남" },
+            { flag: "🇹🇭", name: "태국" },
+            { flag: "🇨🇭", name: "스위스" },
+            { flag: "🇸🇪", name: "스웨덴" },
+            { flag: "🇳🇴", name: "노르웨이" }
+        ];
+
+        let hp = 3;
+        let gold = 100;
+        let distance = 0;
+        let currentEnemy = null;
+        let currentChoices = [];
+        let hasShield = false;
+        let skipActive = false; // 오답 제거 찬스 활성화 여부
+        let isGameOver = false;
+
+        function startGame() {
+            nextEncounter();
+        }
+
+        // 새로운 적(국기) 등장
+        function nextEncounter() {
+            if (isGameOver) return;
+
+            if (distance >= 500) {
+                document.getElementById("message").textContent = "🏆 축하합니다! 500m를 돌파하여 보스 적을 물리쳤습니다!";
+                document.getElementById("quiz-box").innerHTML = "<h2>🎉 게임 클리어! 승리를 축하합니다! 🎉</h2>";
+                return;
+            }
+
+            skipActive = false;
+            // 랜덤 국기 선택
+            currentEnemy = countryData[Math.floor(Math.random() * countryData.length)];
+            
+            // 화면 표시 업데이트
+            document.getElementById("flag-display").textContent = currentEnemy.flag;
+            document.getElementById("distance").textContent = distance;
+            document.getElementById("hp").textContent = hp;
+            document.getElementById("gold").textContent = gold;
+
+            // 선택지 만들기 (정답 1개 + 오답 3개 무작위 추출)
+            let choices = [currentEnemy.name];
+            while (choices.length < 4) {
+                let randomCountry = countryData[Math.floor(Math.random() * countryData.length)].name;
+                if (!choices.includes(randomCountry)) {
+                    choices.push(randomCountry);
+                }
+            }
+            // 섞기
+            choices.sort(() => Math.random() - 0.5);
+            currentChoices = choices;
+
+            renderChoices();
+        }
+
+        // 선택지 HTML 렌더링
+        function renderChoices() {
+            let choicesDiv = document.getElementById("choices");
+            choicesDiv.innerHTML = "";
+            
+            currentChoices.forEach((choice) => {
+                let btn = document.createElement("button");
+                btn.className = "choice-btn";
+                btn.textContent = choice;
+                btn.onclick = () => checkAnswer(choice);
+                choicesDiv.appendChild(btn);
+            });
+        }
+
+        // 정답 체크
+        function checkAnswer(selected) {
+            if (isGameOver) return;
+
+            let message = document.getElementById("message");
+            let hero = document.getElementById("hero");
+
+            // 찬스 아이템 '오답 1개 제거'가 켜져있고 틀린 걸 골랐다면? (혹은 맞출 때까지 혹은 한번 써서 오답 하나 지우기)
+            if (selected === currentEnemy.name) {
+                // 정답!
+                message.textContent = `✅ 정답입니다! (${currentEnemy.name}) 50m 전진 & +40골드 획득!`;
+                message.style.color = "#4cd137";
+                gold += 40;
+                distance += 50;
+
+                // 캐릭터 전진 애니메이션 효과
+                hero.style.transform = "translateX(30px)";
+                setTimeout(() => { hero.style.transform = "translateX(0)"; }, 200);
+
+                setTimeout(nextEncounter, 1200);
+            } else {
+                // 오답인 경우
+                if (skipActive) {
+                    message.textContent = "⚠️ [오답 제거 찬스 발동!] 틀린 선택지가 사라졌습니다. 다시 골라주세요!";
+                    message.style.color = "#ffa502";
+                    // 오답 하나만 버튼에서 지우기
+                    currentChoices = currentChoices.filter(c => c !== selected && c !== currentEnemy.name);
+                    currentChoices.push(currentEnemy.name); // 정답은 유지
+                    currentChoices.sort(() => Math.random() - 0.5);
+                    renderChoices();
+                    skipActive = false; // 소모
+                    return;
+                }
+
+                // 오답 데미지
+                if (hasShield) {
+                    hasShield = false;
+                    message.textContent = `❌ 오답! 하지만 🛡️ 방패가 공격을 막아주었습니다! (정답: ${currentEnemy.name})`;
+                    message.style.color = "#ff4757";
+                } else {
+                    hp--;
+                    message.textContent = `❌ 오답입니다! 데미지 1 💔 (정답: ${currentEnemy.name})`;
+                    message.style.color = "#ff4757";
+                }
+
+                document.getElementById("hp").textContent = hp;
+                document.getElementById("gold").textContent = gold;
+
+                if (hp <= 0) {
+                    gameOver();
+                } else {
+                    setTimeout(nextEncounter, 1500);
+                }
+            }
+        }
+
+        // 아이템 구매 함수
+        function buyItem(type) {
+            if (isGameOver) return;
+            let message = document.getElementById("message");
+
+            if (type === 'heal') {
+                if (gold >= 50) {
+                    gold -= 50;
+                    hp++;
+                    message.textContent = "❤️ 체력이 1 회복되었습니다!";
+                } else {
+                    message.textContent = "⚠️ 골드가 부족합니다! (필요: 50G)";
+                }
+            } else if (type === 'skip') {
+                if (gold >= 70) {
+                    gold -= 70;
+                    skipActive = true;
+                    message.textContent = "⏭️ 오답 제거 찬스 장착! 다음 오답을 누르면 오답이 지워집니다.";
+                } else {
+                    message.textContent = "⚠️ 골드가 부족합니다! (필요: 70G)";
+                }
+            } else if (type === 'shield') {
+                if (gold >= 100) {
+                    if (hasShield) {
+                        message.textContent = "⚠️ 이미 방패를 장착하고 있습니다!";
+                        return;
+                    }
+                    gold -= 100;
+                    hasShield = true;
+                    message.textContent = "🛡️ 방패 장착 완료! 다음 틀린 공격을 1회 방어합니다.";
+                } else {
+                    message.textContent = "⚠️ 골드가 부족합니다! (필요: 100G)";
+                }
+            }
+            document.getElementById("gold").textContent = gold;
+            document.getElementById("hp").textContent = hp;
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            document.getElementById("message").textContent = "💀 체력이 모두 소모되었습니다. 게임 오버!";
+            document.getElementById("quiz-box").innerHTML = "<h2>GAME OVER</h2><button class='choice-btn' onclick='location.reload()'>다시 도전하기</button>";
+        }
+
+        // 게임 최초 실행
+        startGame();
+    </script>
+
+</body>
+</html>

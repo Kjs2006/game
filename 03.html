@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>비행 회피 게임</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        h1 { margin: 5px 0; font-size: 22px; color: #00ffcc; }
+        #score-board {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        canvas {
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            display: block;
+            margin: 0 auto;
+            border: 4px solid #00ffcc;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+        }
+        #controls-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 스페이스 비행 회피 게임 🚀</h1>
+    <div id="score-board">점수: <span id="score">0</span>점 | 최고 기록: <span id="high-score">0</span>점</div>
+    
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    
+    <div id="controls-info">조작법: 키보드 <b>좌/우 방향키</b> (또는 <b>A / D 키</b>)</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // 게임 상태 변수
+        let score = 0;
+        let highScore = 0;
+        let isGameOver = false;
+        let gameSpeed = 4;
+
+        // 플레이어 (비행선) 객체
+        let player = {
+            x: canvas.width / 2 - 20,
+            y: canvas.height - 80,
+            width: 40,
+            height: 40,
+            speed: 6,
+            dx: 0
+        };
+
+        // 장애물 배열
+        let obstacles = [];
+        let spawnTimer = 0;
+
+        // 키 입력 처리
+        let keys = {};
+        window.addEventListener("keydown", (e) => {
+            keys[e.key] = true;
+            if (isGameOver && (e.key === " " || e.key === "Enter")) {
+                restartGame();
+            }
+        });
+        window.addEventListener("keyup", (e) => {
+            keys[e.key] = false;
+        });
+
+        // 게임 리스타트
+        function restartGame() {
+            score = 0;
+            gameSpeed = 4;
+            obstacles = [];
+            isGameOver = false;
+            player.x = canvas.width / 2 - 20;
+            loop();
+        }
+
+        // 장애물 생성 함수
+        function spawnObstacle() {
+            let width = Math.floor(Math.random() * 40) + 30; // 30 ~ 70 크기
+            let x = Math.random() * (canvas.width - width);
+            let y = -50;
+            let speed = gameSpeed + (Math.random() * 2);
+            obstacles.push({ x: x, y: y, width: width, height: 30, speed: speed });
+        }
+
+        // 충돌 감지 함수 (AABB 박스 충돌)
+        function checkCollision(rect1, rect2) {
+            return (
+                rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y
+            );
+        }
+
+        // 업데이트 루프
+        function update() {
+            if (isGameOver) return;
+
+            // 점수 증가 및 속도 증가
+            score++;
+            document.getElementById("score").textContent = Math.floor(score / 10);
+            if (score % 500 === 0) {
+                gameSpeed += 0.5; // 시간이 지날수록 점점 빨라짐
+            }
+
+            // 플레이어 이동 (좌우 방향키 또는 A/D)
+            if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+                player.x -= player.speed;
+            }
+            if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+                player.x += player.speed;
+            }
+
+            // 화면 밖으로 나가지 않도록 제한
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) {
+                player.x = canvas.width - player.width;
+            }
+
+            // 장애물 생성 타이머
+            spawnTimer++;
+            if (spawnTimer > 40 - Math.min(gameSpeed * 2, 25)) {
+                spawnObstacle();
+                spawnTimer = 0;
+            }
+
+            // 장애물 이동 및 충돌 체크
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].y += obstacles[i].speed;
+
+                // 플레이어와 충돌 확인
+                if (checkCollision(player, obstacles[i])) {
+                    isGameOver =- true;
+                    if (Math.floor(score / 10) > highScore) {
+                        highScore = Math.floor(score / 10);
+                        document.getElementById("high-score").textContent = highScore;
+                    }
+                }
+
+                // 화면 아래로 지나간 장애물 제거
+                if (obstacles[i].y > canvas.height) {
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        // 화면 그리기 루프
+        function draw() {
+            // 배경 지우기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 우주 배경 반짝이는 효과 느낌의 별들 (고정 장식)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+            for (let i = 0; i < 20; i++) {
+                let bx = (i * 37 + score) % canvas.width;
+                let by = (i * 53 + score * 2) % canvas.height;
+                ctx.fillRect(bx, by, 2, 2);
+            }
+
+            // 플레이어 그리기 (우주선 모양 🚀 대용)
+            ctx.fillStyle = "#00ffcc";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // 비행선 머리 추가 장식
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(player.x + 12, player.y - 10, 16, 10);
+
+            // 장애물 그리기 (운석/미사일 ☄️)
+            ctx.fillStyle = "#ff5555";
+            for (let i = 0; i < obstacles.length; i++) {
+                let obs = obstacles[i];
+                ctx.beginPath();
+                ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 5);
+                ctx.fill();
+            }
+
+            // 게임 오버 화면 출력
+            if (isGameOver) {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = "#ff3333";
+                ctx.font = "bold 32px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 30);
+
+                ctx.fillStyle = "white";
+                ctx.font = "18px Arial";
+                ctx.fillText("최종 점수: " + Math.floor(score / 10) + "점", canvas.width / 2, canvas.height / 2 + 10);
+                
+                ctx.fillStyle = "#00ffcc";
+                ctx.font = "15px Arial";
+                ctx.fillText("다시 시작하려면 [스페이스바]를 누르세요", canvas.width / 2, canvas.height / 2 + 50);
+            }
+        }
+
+        // 메인 게임 루프
+        function loop() {
+            update();
+            draw();
+            if (!isGameOver) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        // 게임 최초 실행
+        loop();
+    </script>
+
+</body>
+</html>
