@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>미니 게임 천국 🎮</title>
+    <style>
+        body {
+            background-color: #0f1020;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 30px;
+        }
+        h1 {
+            color: #00ffcc;
+            font-size: 32px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0,255,204,0.5);
+        }
+        p {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: #1a1b35;
+            border: 2px solid #333464;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .game-card:hover {
+            border-color: #00ffcc;
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,255,204,0.2);
+        }
+        .game-card h3 {
+            margin: 0 0 10px 0;
+            color: #ffeb3b;
+            font-size: 20px;
+        }
+        .game-card p {
+            color: #cfd8dc;
+            font-size: 14px;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+        .play-btn {
+            background-color: #00ffcc;
+            color: #0f1020;
+            text-decoration: none;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 6px;
+            display: block;
+            transition: 0.1s;
+        }
+        .play-btn:hover {
+            background-color: #00b388;
+            color: white;
+        }
+        footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🕹️ 미니 게임 천국 🕹️</h1>
+    <p>원하는 게임을 선택하여 바로 플레이해보세요!</p>
+
+    <div class="container">
+        <!-- 1. 페널티킥 골키퍼 -->
+        <div class="game-card">
+            <div>
+                <h3>⚽ 페널티킥 골키퍼</h3>
+                <p>좌, 중, 우 방향을 예측하여 날아오는 축구공을 막아내는 스릴 만점 방어 게임!</p>
+            </div>
+            <a href="01.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+
+        <!-- 2. 국기 퀴즈 RPG -->
+        <div class="game-card">
+            <div>
+                <h3>🚩 국기 퀴즈 어드벤처</h3>
+                <p>앞으로 전진하며 나타나는 국기 적을 맞추고, 상점에서 아이템과 찬스를 구매하는 RPG!</p>
+            </div>
+            <a href="02.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+
+        <!-- 3. 비행 회피 게임 -->
+        <div class="game-card">
+            <div>
+                <h3>🚀 비행 회피 아케이드</h3>
+                <p>좌우 방향키(A/D)로 비행선을 조작해 위에서 떨어지는 위험한 장애물들을 피하는 슈팅 게임!</p>
+            </div>
+            <a href="03.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+
+        <!-- 4. 상인 경제 게임 -->
+        <div class="game-card">
+            <div>
+                <h3>📈 상인 트레이딩 타이쿤</h3>
+                <p>기본 100원으로 시작해 2턴마다 변동되는 시세를 파악해 물건을 사고팔며 거부이 되어보세요!</p>
+            </div>
+            <a href="04.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+
+        <!-- 5. 룰렛 배팅 게임 -->
+        <div class="game-card">
+            <div>
+                <h3>🎰 럭키 룰렛 배팅</h3>
+                <p>기본 100칩을 가지고 숫자나 홀짝 구역에 칩을 배팅해 배당금을 따내는 스릴 넘치는 룰렛!</p>
+            </div>
+            <a href="05.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+
+        <!-- 6. 주사위 텍스트 RPG -->
+        <div class="game-card">
+            <div>
+                <h3>🎲 운명의 주사위 모험</h3>
+                <p>위기 상황마다 주사위 2개를 굴려 목표 합계 이상을 달성하고 시련을 헤쳐나가는 판타지 RPG!</p>
+            </div>
+            <a href="06.html" class="play-btn">게임 플레이 ▶</a>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Mini Game Portal. Created for Fun!
+    </footer>
+
+</body>
+</html>
