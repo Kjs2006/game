@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김진서의 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background-color: #f8f9fa;
+            color: #333333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 48px 36px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .sub-title {
+            display: inline-block;
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #111111;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #666666;
+            line-height: 1.7;
+            margin-bottom: 32px;
+            word-break: keep-all;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #1a73e8;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <span class="sub-title">Welcome to my space</span>
+        <h1>환영합니다!</h1>
+        <h2>김진서의 페이지입니다.</h2>
+        <p>
+            소중한 시간을 내어 찾아주신 모든 분들께 진심으로 감사드립니다.<br>
+            이곳에서 좋은 영감과 유익한 정보를 얻어가실 수 있기를 바랍니다.<br>
+            늘 따뜻함과 즐거움이 가득한 공간이 되도록 만들어 가겠습니다.
+        </p>
+        <a href="https://kjs2006.github.io/" class="btn">둘러보기</a>
+    </div>
+
+</body>
+</html>
